@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "super-moccasin-tahr",
+    "slug": "super-moccasin-tahr",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": { "bundleIdentifier": "computer.inti.supermoccasintahr" },
+    "scheme": "supermoccasintahr"
+  }
+}
