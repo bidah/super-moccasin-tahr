@@ -1,4 +1,4 @@
-// native-sim-template-version: 23
+// native-sim-template-version: 24
 /**
  * Patches @expo/serve-sim 0.4.0's input-socket admission, in place.
  *
@@ -47,9 +47,13 @@ if (!m) {
   process.exit(1);
 }
 const [, sock, cap] = m;
+// serve-sim hands attachHidSocket two kinds of socket: a `ws` WebSocket, and
+// a small wrapper ({send, on, close}) for its raw-upgrade path that has no
+// ping/pong/once. Calling `.once` on the wrapper threw and took the whole
+// server down (inti.5), so the heartbeat only goes on sockets that have it.
 const heartbeat =
-  `(()=>{let alive=!0;const timer=setInterval(()=>{if(!alive){try{${sock}.terminate()}catch{}return}alive=!1;try{${sock}.ping()}catch{}},15000);` +
-  `${sock}.on("pong",()=>{alive=!0});${sock}.once("close",()=>clearInterval(timer))})(),`;
+  `(typeof ${sock}.ping==="function"&&typeof ${sock}.once==="function"&&typeof ${sock}.terminate==="function"&&(()=>{let alive=!0;const timer=setInterval(()=>{if(!alive){try{${sock}.terminate()}catch{}return}alive=!1;try{${sock}.ping()}catch{}},15000);` +
+  `${sock}.on("pong",()=>{alive=!0});${sock}.once("close",()=>clearInterval(timer))})()),`;
 src = src.replace(
   admit,
   `attachHidSocket(${sock}){if(this.phase!=="running"){${sock}.close(1013,"Simulator capture is not running yet; retrying");return}` +
